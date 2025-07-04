@@ -7,7 +7,7 @@ FIREBASE_URL = 'https://resqalert-22692-default-rtdb.asia-southeast1.firebasedat
 FCM_ENDPOINT = 'https://fcm.googleapis.com/fcm/send'
 FCM_SERVER_KEY = 'Bearer YOUR_FCM_SERVER_KEY_HERE'  # 🔒 Replace with actual FCM key
 
-# ⚠️ Replace these with actual FCM tokens for each department
+# 🔐 Replace with real FCM tokens for each department
 device_tokens = {
     'PNP': 'fcm_token_pnp',
     'MDRRMO': 'fcm_token_mdrrmo',
@@ -15,10 +15,8 @@ device_tokens = {
     'default': 'fcm_token_default'
 }
 
-
 def get_google_maps_link(lat, lng):
     return f'https://www.google.com/maps?q={lat},{lng}'
-
 
 def send_fcm_notification(token, title, body):
     headers = {
@@ -36,8 +34,7 @@ def send_fcm_notification(token, title, body):
     }
     return requests.post(FCM_ENDPOINT, headers=headers, json=payload)
 
-
-@report_bp.route('/api/reports/<item_id>/status', methods=['PATCH'])
+@report_bp.route('/reports/<item_id>/status', methods=['PATCH'])
 def update_status(item_id):
     status = request.json.get('status')
     if status not in ['Responding', 'Rescued', 'Invalid']:
@@ -63,10 +60,13 @@ def update_status(item_id):
 
         errors = []
 
+        if not isinstance(flags, list):
+            flags = [flags] if flags else []
+
         for dept in flags:
             token = device_tokens.get(dept, device_tokens['default'])
             notif_title = f"{dept} Alert - {status}"
-            notif_body = f"{body}"
+            notif_body = body
             if location_link:
                 notif_body += f"\nLocation: {location_link}"
 
@@ -95,8 +95,7 @@ def update_status(item_id):
     except Exception as e:
         return jsonify({'error': 'Failed to update report or send notifications', 'details': str(e)}), 500
 
-
-@report_bp.route('/api/reports', methods=['GET'])
+@report_bp.route('/reports', methods=['GET'])
 def get_reports():
     role = request.args.get('role')  # Optional filter
 
@@ -108,18 +107,20 @@ def get_reports():
         if not data:
             return jsonify([]), 200
 
-        # Convert dict to list
         reports = []
         for report_id, report in data.items():
             if isinstance(report, dict):
-                report['id'] = report_id  # Add ID to each report
+                report['id'] = report_id
                 reports.append(report)
 
-        # Filter by role (department) if provided
         if role:
+            role = role.upper()
             reports = [
                 report for report in reports
-                if 'flag' in report and isinstance(report['flag'], list) and role in report['flag']
+                if 'flag' in report and (
+                    (isinstance(report['flag'], list) and role in [f.upper() for f in report['flag']]) or
+                    (isinstance(report['flag'], str) and report['flag'].upper() == role)
+                )
             ]
 
         return jsonify(reports), 200
