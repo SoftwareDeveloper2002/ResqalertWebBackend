@@ -1,7 +1,8 @@
 import os
 import time
 import requests
-from flask import Blueprint, jsonify
+from flask_cors import cross_origin
+from flask import Blueprint, jsonify, request
 from datetime import datetime
 from flask_cors import CORS
 
@@ -155,3 +156,60 @@ def barangay_stats():
         time.sleep(0.1)
 
     return jsonify(barangay_count)
+
+incident_requests = []
+
+@dashboard_bp.route('/api/incidents/send-request', methods=['GET', 'POST', 'OPTIONS'])
+@cross_origin(origins="http://localhost:4200")  # Allow Angular dev server
+def pdfReqAndAccept():
+    """
+    Handles sending and accepting PDF requests for incidents based on office/role.
+    Supports GET, POST, and OPTIONS (CORS preflight).
+    """
+
+    # Handle CORS preflight
+    if request.method == 'OPTIONS':
+        return jsonify({"status": "CORS preflight OK"}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+
+        incident_id = data.get('incident_id')
+        office = data.get('office')      # e.g., "BFP", "PNP", "MDRRMO"
+        action = data.get('action')      # "send" or "accept"
+        sender = data.get('sender')      # User sending/accepting request
+
+        # Validate required fields
+        if not incident_id or not office or not action or not sender:
+            return jsonify({"error": "Missing required fields"}), 400
+
+        if action == "send":
+            request_entry = {
+                "incident_id": incident_id,
+                "office": office,
+                "status": "Pending",
+                "requested_by": sender,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            incident_requests.append(request_entry)
+            return jsonify({"message": f"PDF request sent to {office}", "data": request_entry}), 200
+
+        elif action == "accept":
+            for req in incident_requests:
+                if req["incident_id"] == incident_id and req["office"] == office and req["status"] == "Pending":
+                    req["status"] = "Accepted"
+                    req["accepted_by"] = sender
+                    req["accepted_at"] = datetime.utcnow().isoformat()
+                    return jsonify({"message": f"PDF request accepted by {office}", "data": req}), 200
+
+            return jsonify({"error": "No pending request found to accept"}), 404
+
+        return jsonify({"error": "Invalid action"}), 400
+
+    # If GET request, optionally filter by incident_id
+    incident_id = request.args.get('incident_id')
+    if incident_id:
+        filtered = [req for req in incident_requests if req["incident_id"] == incident_id]
+        return jsonify(filtered), 200
+
+    return jsonify(incident_requests), 200

@@ -51,7 +51,7 @@ def admin_login():
             return jsonify({
                 'success': False,
                 'message': f'❌ No users found for role {role}'
-            }), 404
+            }), 404 # Not found!
 
         for user_id, user_data in users.items():
             if (
@@ -63,12 +63,12 @@ def admin_login():
                     'success': True,
                     'message': f'✅ Welcome, {username}',
                     'role': role
-                }), 200
+                }), 200 # Okay status return code
 
         return jsonify({
             'success': False,
             'message': '❌ Invalid username or password'
-        }), 401
+        }), 401 # Inavalid data
 
     except requests.exceptions.RequestException as e:
         logger.error(f"Firebase error: {e}")
@@ -76,4 +76,4 @@ def admin_login():
             'success': False,
             'message': '❌ Firebase error',
             'error': str(e)
-        }), 500
+        }), 500 # Internal error server

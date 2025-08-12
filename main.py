@@ -10,13 +10,13 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 # Register blueprints with correct prefixes
-app.register_blueprint(report_bp, url_prefix='/api/report')
-app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+app.register_blueprint(report_bp, url_prefix='/api/report') # Enpoint for report blueprint
+app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard') # Endpoint for dashboard blueprint
 app.register_blueprint(login_bp, url_prefix='/api/admin')  # This ensures endpoint is /api/admin/login
 
 @app.route('/')
 def home():
     return '✅ Flask backend for ResqAlert is running.'
-
+    # This is the root endpoint
 if __name__ == '__main__':
-    app.run(debug=True, port=7000)
+    app.run(debug=True, port=7000) # Main function
