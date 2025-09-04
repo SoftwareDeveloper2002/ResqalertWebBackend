@@ -139,46 +139,50 @@ def get_reports():
     except Exception as e:
         return jsonify({'error': 'Failed to load reports', 'details': str(e)}), 500
 
-
-# ✅ GET report by ID (numeric index or Firebase ID)
 @report_bp.route('/reports/<item_id>', methods=['GET'])
 def get_report_by_id(item_id):
     try:
+        role = request.args.get('role')
+
+        # Get all reports
+        res = http_requests.get(f'{FIREBASE_URL}/reports.json')
+        res.raise_for_status()
+        reports = res.json() or {}
+
+        if not reports:
+            return jsonify({'error': 'No reports found'}), 404
+
+        # Filter by role if provided
+        if role:
+            reports = {k: v for k, v in reports.items() if role in v.get('flag', [])}
+
+        if not reports:
+            return jsonify({'error': f'No reports found for role {role}'}), 404
+
+        # Sort by timestamp ascending
+        sorted_reports = sorted(reports.items(), key=lambda kv: kv[1].get('timestamp', 0))
+
         if item_id.isdigit():
-            res = http_requests.get(f'{FIREBASE_URL}/reports.json')
-            res.raise_for_status()
-            reports = res.json() or {}
-
-            if not reports:
-                return jsonify({'error': 'No reports found'}), 404
-
-            sorted_reports = sorted(
-                reports.items(),
-                key=lambda kv: kv[1].get('timestamp', 0)
-            )
-
+            # Numeric index requested
             index = int(item_id) - 1
             if index < 0 or index >= len(sorted_reports):
-                return jsonify({'error': 'Report not found'}), 404
+                return jsonify({'error': f'Report at index {item_id} not found for role {role}'}), 404
 
             report_id, report_data = sorted_reports[index]
-            report_data['id'] = report_id
-            return jsonify(report_data), 200
-
         else:
-            res = http_requests.get(f'{FIREBASE_URL}/reports/{item_id}.json')
-            res.raise_for_status()
-            report = res.json()
-
-            if not report:
+            # Firebase ID requested
+            report_id, report_data = next(
+                ((k, v) for k, v in reports.items() if k == item_id), 
+                (None, None)
+            )
+            if not report_data:
                 return jsonify({'error': 'Report not found'}), 404
 
-            report['id'] = item_id
-            return jsonify(report), 200
+        report_data['id'] = report_id
+        return jsonify(report_data), 200
 
     except Exception as e:
         return jsonify({'error': 'Failed to load report', 'details': str(e)}), 500
-
 
 # ====================================
 # 📌 Request Endpoints
@@ -222,7 +226,7 @@ def create_request():
     except Exception as e:
         return jsonify({"error": "Failed to create request", "details": str(e)}), 500
 
-# ✅ Get requests for current role
+# Get requests for current role
 @report_bp.route('/requests', methods=['GET'])
 def get_requests_for_role():
     current_role = request.args.get("role")
@@ -248,7 +252,7 @@ def get_requests_for_role():
         return jsonify({"error": "Failed to fetch requests", "details": str(e)}), 500
 
 
-# ✅ Accept request (update status to Approved)
+#  Accept request (update status to Approved)
 @report_bp.route('/requests/<request_id>/approve', methods=['PATCH'])
 def approve_request(request_id):
     try:
