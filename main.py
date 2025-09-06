@@ -7,7 +7,13 @@ from login import login_bp  # Make sure this is defined in login.py
 app = Flask(__name__)
 
 # CORS Configuration — allow all origins for /api/* routes
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+CORS(
+    app,
+    resources={r"/api/*": {"origins": "*"}},
+    supports_credentials=True,
+    methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"]
+)
 
 # Register blueprints with correct prefixes
 app.register_blueprint(report_bp, url_prefix='/api/report') # Enpoint for report blueprint

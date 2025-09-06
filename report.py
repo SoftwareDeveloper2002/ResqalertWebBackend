@@ -184,11 +184,8 @@ def get_report_by_id(item_id):
     except Exception as e:
         return jsonify({'error': 'Failed to load report', 'details': str(e)}), 500
 
-# ====================================
-# 📌 Request Endpoints
-# ====================================
 
-# ✅ Create a new request entry
+# ✅ Create a new request entry (saves to request_data)
 @report_bp.route('/requests', methods=['POST', 'OPTIONS'])
 def create_request():
     if request.method == "OPTIONS":  # Handle preflight
@@ -208,12 +205,13 @@ def create_request():
 
         request_entry = {
             "incident_id": incident_id,
-            "from_role": data.get("from_role", "").upper(),  # role making the request
-            "to_role": data.get("to_role", "").upper(),      # target role / department
+            "from_role": from_role.upper(),
+            "to_role": to_role.upper(),
             "status": "Pending",
             "timestamp": int(time.time() * 1000)
         }
 
+        # ✅ Save to request_data instead of requests
         res = http_requests.post(f"{FIREBASE_URL}/requests.json", json=request_entry)
         res.raise_for_status()
 
@@ -226,7 +224,6 @@ def create_request():
     except Exception as e:
         return jsonify({"error": "Failed to create request", "details": str(e)}), 500
 
-# Get requests for current role
 @report_bp.route('/requests', methods=['GET'])
 def get_requests_for_role():
     current_role = request.args.get("role")
@@ -239,10 +236,13 @@ def get_requests_for_role():
         res.raise_for_status()
         data = res.json() or {}
 
-        # Filter requests where to_role matches current role
+        # Filter requests where to_role or from_role matches current role
         filtered_requests = []
         for req_id, req in data.items():
-            if isinstance(req, dict) and req.get("to_role", "").upper() == current_role.upper():
+            if isinstance(req, dict) and (
+                req.get("to_role", "").upper() == current_role.upper() or
+                req.get("from_role", "").upper() == current_role.upper()
+            ):
                 req["id"] = req_id  # include Firebase key
                 filtered_requests.append(req)
 
@@ -250,11 +250,13 @@ def get_requests_for_role():
 
     except Exception as e:
         return jsonify({"error": "Failed to fetch requests", "details": str(e)}), 500
-
-
-#  Accept request (update status to Approved)
-@report_bp.route('/requests/<request_id>/approve', methods=['PATCH'])
+    
+# Accept request (update status to Approved)
+@report_bp.route('/requests/<request_id>/approve', methods=['PATCH', 'OPTIONS'])
 def approve_request(request_id):
+    if request.method == "OPTIONS":  # Handle preflight
+        return jsonify({}), 200
+
     try:
         update_data = {"status": "Approved", "approved_timestamp": int(time.time() * 1000)}
 
@@ -266,3 +268,86 @@ def approve_request(request_id):
 
     except Exception as e:
         return jsonify({"error": "Failed to approve request", "details": str(e)}), 500
+
+
+# Decline request (update status to Rejected)
+@report_bp.route('/requests/<request_id>/decline', methods=['PATCH', 'OPTIONS'])
+def decline_request(request_id):
+    if request.method == "OPTIONS":  # Handle preflight
+        return jsonify({}), 200
+
+    try:
+        update_data = {"status": "Rejected", "declined_timestamp": int(time.time() * 1000)}
+
+        # Update the request in Firebase
+        res = http_requests.patch(f"{FIREBASE_URL}/requests/{request_id}.json", json=update_data)
+        res.raise_for_status()
+
+        return jsonify({"message": "Request declined successfully", "updated_data": update_data}), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to decline request", "details": str(e)}), 500
+
+
+# ✅ New endpoint: Save directly to request_data
+@report_bp.route('/request_data', methods=['POST', 'OPTIONS'])
+def save_direct_request_data():
+    if request.method == "OPTIONS":  # CORS preflight
+        return jsonify({}), 200
+
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "Missing request body"}), 400
+
+        # Save directly into Firebase /request_data
+        res = http_requests.post(f"{FIREBASE_URL}/request_data.json", json=data)
+        res.raise_for_status()
+
+        return jsonify({
+            "message": "Saved directly into request_data",
+            "firebase_id": res.json().get("name"),
+            "data": data
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": "Failed to save into request_data", "details": str(e)}), 500
+
+# ✅ New endpoint: Save directly to request_data
+@report_bp.route('/request_data', methods=['POST', 'OPTIONS', 'GET'])
+def handle_request_data():
+    if request.method == "OPTIONS":  # CORS preflight
+        return jsonify({}), 200
+
+    if request.method == "POST":
+        try:
+            data = request.json
+            if not data:
+                return jsonify({"error": "Missing request body"}), 400
+
+            # Save directly into Firebase /request_data
+            res = http_requests.post(f"{FIREBASE_URL}/request_data.json", json=data)
+            res.raise_for_status()
+
+            return jsonify({
+                "message": "Saved directly into request_data",
+                "firebase_id": res.json().get("name"),
+                "data": data
+            }), 201
+
+        except Exception as e:
+            return jsonify({"error": "Failed to save into request_data", "details": str(e)}), 500
+
+    if request.method == "GET":
+        try:
+            # Fetch all request_data from Firebase
+            res = http_requests.get(f"{FIREBASE_URL}/request_data.json")
+            res.raise_for_status()
+
+            data = res.json() or {}
+            # Convert Firebase dict {id: {...}} → list of objects with "id"
+            request_list = [{"id": k, **v} for k, v in data.items()]
+
+            return jsonify(request_list), 200
+        except Exception as e:
+            return jsonify({"error": "Failed to fetch request_data", "details": str(e)}), 500
