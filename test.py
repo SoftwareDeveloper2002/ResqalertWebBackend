@@ -1,7 +1,7 @@
 import sys
 import requests
 apikey = 'e266c4082f5edf3616afe87ed106b8dc'
-sendername = 'SEMAPHORE'
+sendername = 'Resq'
 
 def send_message(message, number):
     """Send an SMS message using the Semaphore API."""
