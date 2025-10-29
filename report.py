@@ -94,8 +94,8 @@ def generate_pdf(report_data):
                     y = height - 50
                 c.drawImage(img_path, 50, y - img_height, width=200, height=img_height, preserveAspectRatio=True)
                 y -= img_height + 10
-            except Exception as e:
-                print(f"Failed to add image {img_path}: {e}")
+            except Exception:
+                print(f"Failed to add image {img_path}: {Exception}")
 
     c.setFont("Helvetica-Oblique", 8)
     c.drawString(50, 30, "This report was sysasdtem generated.")

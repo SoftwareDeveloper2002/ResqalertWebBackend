@@ -77,3 +77,4 @@ def admin_login():
             'message': '❌ Firebase error',
             'error': str(e)
         }), 500 # Internal error server
+

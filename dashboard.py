@@ -23,7 +23,7 @@ def dashboard_summary():
         return jsonify({'error': 'Failed to fetch data', 'details': str(e)}), 500
 
     total = len(data)
-    rescued = sum(1 for x in data.values() if x.get('status') == 'Rescued')
+    rescued = sum(1 for x in data.values() if x.get('status') == 'After')
     invalid = sum(1 for x in data.values() if x.get('status') == 'Invalid')
     others = total - rescued - invalid
 

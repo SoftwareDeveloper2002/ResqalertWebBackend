@@ -4,6 +4,7 @@ from report import report_bp
 from dashboard import dashboard_bp
 from login import login_bp  # Make sure this is defined in login.py
 from sms import sms_bp  # Import the sms blueprint
+
 app = Flask(__name__)
 
 # CORS Configuration — allow all origins for /api/* routes

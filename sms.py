@@ -45,8 +45,6 @@ def send_sms(message, numbers):
         'sendername': SENDER_NAME
     }
 
-    print(f"Sending to {numbers}")
-    print("Message content:\n", message)
 
     try:
         response = requests.post(SEMAPHORE_API, data=payload)
@@ -61,7 +59,6 @@ def send_sms(message, numbers):
         else:
             return {'status': 'Failed', 'response': resp_json}
     except requests.exceptions.RequestException as e:
-        print(f"Failed to send SMS to {numbers}: {e}")
         return {'error': str(e)}
 
 
