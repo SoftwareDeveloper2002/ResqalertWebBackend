@@ -7,7 +7,7 @@ from sms import sms_bp  # Import the sms blueprint
 
 app = Flask(__name__)
 
-# CORS Configuration — allow all origins for /api/* routes
+# CORS Configuration — allow all origins for /api/* routessss
 CORS(
     app,
     resources={r"/api/*": {"origins": "*"}},
