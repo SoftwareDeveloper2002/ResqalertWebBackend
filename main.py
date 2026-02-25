@@ -27,4 +27,4 @@ def home():
     return '✅ Flask backend for ResqAlert is running.'
     # This is the root endpoint
 if __name__ == '__main__':
-    app.run(debug=True, port=7000) # Main function
+    app.run() # Main function
