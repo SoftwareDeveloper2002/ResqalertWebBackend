@@ -324,8 +324,39 @@ def request_data():
 @report_bp.route('/reports/<item_id>/pdf', methods=['GET'])
 def download_report_pdf(item_id):
     try:
-        report_data = http_requests.get(f'{FIREBASE_URL}/reports/{item_id}.json').json()
-        pdf_file = generate_pdf(report_data)
-        return send_file(pdf_file, as_attachment=True, download_name=f'report_{item_id}.pdf')
+        # 1️⃣ Get all request_data entries
+        all_requests = http_requests.get(
+            f'{FIREBASE_URL}/request_data.json'
+        ).json() or {}
+
+        # 2️⃣ Find latest request matching this incident_id
+        matching_requests = [
+            v for v in all_requests.values()
+            if v.get('incident_id') == item_id
+        ]
+
+        if not matching_requests:
+            return jsonify({"error": "No request_data found for this incident"}), 404
+
+        # Sort by timestamp descending
+        latest_request = sorted(
+            matching_requests,
+            key=lambda x: x.get('timestamp', 0),
+            reverse=True
+        )[0]
+
+        # 3️⃣ Generate PDF using EDITED DATA
+        pdf_file = generate_pdf(latest_request)
+
+        return send_file(
+            pdf_file,
+            as_attachment=True,
+            download_name=f'report_{item_id}.pdf'
+        )
+
     except Exception as e:
-        return jsonify({"error": "Failed to generate PDF", "details": str(e)}), 500
+        traceback.print_exc()
+        return jsonify({
+            "error": "Failed to generate PDF",
+            "details": str(e)
+        }), 500
