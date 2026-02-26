@@ -26,7 +26,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px);
             background-size: 40px 40px;
@@ -38,7 +38,6 @@
             to { background-position: 40px 40px; }
         }
 
-        /* Scanning line */
         .scan {
             position: absolute;
             width: 100%;
@@ -62,13 +61,13 @@
         }
 
         .panel {
-            width: 750px;
+            width: 820px;
             padding: 60px;
             border-radius: 20px;
             background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(0,255,255,0.15);
-            box-shadow: 0 0 40px rgba(0,255,255,0.1);
+            box-shadow: 0 0 50px rgba(0,255,255,0.15);
             text-align: center;
             position: relative;
         }
@@ -83,20 +82,17 @@
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 36px;
+            font-size: 38px;
             margin-bottom: 20px;
-            position: relative;
-            display: inline-block;
             animation: glitch 2s infinite;
         }
 
         @keyframes glitch {
             0% { text-shadow: 2px 2px #00ffff; }
-            20% { text-shadow: -2px -2px #ff00ff; }
-            40% { text-shadow: 2px -2px #00ffff; }
-            60% { text-shadow: -2px 2px #ff00ff; }
-            80% { text-shadow: 2px 2px #00ffff; }
-            100% { text-shadow: 0 0 10px #00ffff; }
+            25% { text-shadow: -2px -2px #ff00ff; }
+            50% { text-shadow: 2px -2px #00ffff; }
+            75% { text-shadow: -2px 2px #ff00ff; }
+            100% { text-shadow: 0 0 12px #00ffff; }
         }
 
         p {
@@ -118,23 +114,34 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 0.6; }
+            0%,100% { opacity: 0.6; }
             50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        }
+
+        .info-box {
+            margin-top: 25px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 13px;
+            color: #38bdf8;
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 10px;
         }
 
         .logs {
-            margin-top: 30px;
-            height: 120px;
+            margin-top: 25px;
+            height: 100px;
             overflow: hidden;
             font-family: monospace;
             font-size: 12px;
             text-align: left;
-            color: #38bdf8;
+            color: #22d3ee;
         }
 
-        .logs div {
-            animation: scrollLogs 10s linear infinite;
+        .logs span {
+            display: block;
+            animation: scrollLogs 12s linear infinite;
         }
 
         @keyframes scrollLogs {
@@ -174,13 +181,8 @@
         <h1>ACCESS RESTRICTED</h1>
 
         <p>
-            You have reached a protected backend infrastructure endpoint.
-            This system handles internal API operations and is not intended for direct public access.
-        </p>
-
-        <p>
-            Unauthorized interaction is logged and monitored.
-            Please access services through the official frontend application.
+            This endpoint is part of the protected backend infrastructure.
+            Direct public interaction is not permitted.
         </p>
 
         <div class="status">
@@ -189,19 +191,27 @@
             <div>Environment: <span>PRODUCTION</span></div>
         </div>
 
+        <!-- Flask Data Display -->
+        <div class="info-box">
+            Visitor IP: {{ ip }} <br>
+            User Agent: {{ user_agent }} <br>
+            Referrer: {{ referrer }} <br>
+            Server Time: {{ time }}
+        </div>
+
         <div class="logs">
-            <div>
-                [SYS] Initializing security modules...<br>
-                [AUTH] Token validation active.<br>
-                [NET] Traffic encryption enabled.<br>
-                [FW] Intrusion detection running...<br>
-                [CORE] Monitoring incoming requests...<br>
-                [SYS] Initializing security modules...<br>
-                [AUTH] Token validation active.<br>
-                [NET] Traffic encryption enabled.<br>
-                [FW] Intrusion detection running...<br>
-                [CORE] Monitoring incoming requests...
-            </div>
+            <span>
+                [SYS] Initializing modules...<br>
+                [AUTH] Verifying request origin...<br>
+                [NET] Encrypting traffic stream...<br>
+                [SEC] Logging visitor metadata...<br>
+                [CORE] System stable...<br>
+                [SYS] Initializing modules...<br>
+                [AUTH] Verifying request origin...<br>
+                [NET] Encrypting traffic stream...<br>
+                [SEC] Logging visitor metadata...<br>
+                [CORE] System stable...
+            </span>
         </div>
 
     </div>
@@ -212,6 +222,7 @@
 </footer>
 
 <script>
+    // Live Clock
     function updateClock() {
         const now = new Date();
         document.getElementById('clock').innerText =
@@ -219,6 +230,19 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    // Send device info to backend
+    fetch("/device-info", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            screen: window.screen.width + "x" + window.screen.height,
+            platform: navigator.platform,
+            language: navigator.language
+        })
+    });
 </script>
 
 </body>
