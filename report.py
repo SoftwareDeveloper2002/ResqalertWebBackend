@@ -285,33 +285,38 @@ def request_data():
     if request.method == "OPTIONS":
         return jsonify({}), 200
     if request.method == "POST":
-        try:
-            data = request.form.to_dict()
-            data['whoInvolved'] = data.get('whoInvolved') or 'N/A'
-            data['peopleCount'] = int(data.get('peopleCount') or 0)
-            data['details'] = data.get('details') or 'No additional details provided.'
-            data['notes'] = data.get('notes') or 'No notes provided.'
-            data['incident_id'] = data.get('incident_id') or 'N/A'
-            data['from_role'] = data.get('from_role') or 'N/A'
-            data['to_role'] = data.get('to_role') or 'N/A'
-            data['status'] = data.get('status') or 'Pending'
-            data['timestamp'] = int(data.get('timestamp') or time.time() * 1000)
+    try:
+        data = request.get_json() or request.form.to_dict()
 
-            files = request.files.getlist('images')
-            uploaded_files = []
-            for f in files:
-                filename = f.filename
-                save_path = os.path.join(UPLOAD_FOLDER, filename)
-                f.save(save_path)
-                uploaded_files.append(save_path)
-            data['images'] = uploaded_files
+        if not data:
+            return jsonify({"error": "Missing request body"}), 400
 
-            res = http_requests.post(f"{FIREBASE_URL}/request_data.json", json=data)
-            res.raise_for_status()
-            return jsonify({"message": "Saved successfully", "firebase_id": res.json().get("name"), "data": data}), 201
-        except Exception as e:
-            traceback.print_exc()
-            return jsonify({"error": "Failed to save request_data", "details": str(e)}), 500
+        data['whoInvolved'] = data.get('whoInvolved') or 'N/A'
+        data['peopleCount'] = int(data.get('peopleCount') or 0)
+        data['details'] = data.get('details') or 'No additional details provided.'
+        data['notes'] = data.get('notes') or 'No notes provided.'
+        data['incident_id'] = data.get('incident_id') or 'N/A'
+        data['from_role'] = data.get('from_role') or 'N/A'
+        data['to_role'] = data.get('to_role') or 'N/A'
+        data['status'] = data.get('status') or 'Pending'
+        data['timestamp'] = int(data.get('timestamp') or time.time() * 1000)
+
+        res = http_requests.post(
+            f"{FIREBASE_URL}/request_data.json",
+            json=data
+        )
+        res.raise_for_status()
+
+        return jsonify({
+            "message": "Saved successfully",
+            "firebase_id": res.json().get("name"),
+            "data": data
+        }), 201
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": "Failed to save request_data", "details": str(e)}), 500
+    
     if request.method == "GET":
         try:
             data = http_requests.get(f"{FIREBASE_URL}/request_data.json").json() or {}
