@@ -1,28 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Backend</title>
+    <title>Nothing To See Here</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            text-align: center;
-            padding-top: 100px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
         .card {
-            background: white;
-            padding: 40px;
-            margin: auto;
-            width: 400px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            padding: 60px 50px;
+            border-radius: 20px;
+            text-align: center;
+            width: 480px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 16px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .lock {
+            font-size: 50px;
+            margin-bottom: 25px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 12px;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
+
     <div class="card">
-        <h2>Flask Server Running ✅</h2>
-        <p>Your backend is alive and serving templates.</p>
+        <div class="lock">🔒</div>
+        <h1>Nothing To See Here</h1>
+        <p>
+            This is a backend service.<br>
+            There’s nothing you can access from here.<br><br>
+            If you're looking for something… you're in the wrong place.
+        </p>
     </div>
+
+    <div class="footer">
+        © 2026 | Soltryx Solutions
+    </div>
+
 </body>
 </html>
