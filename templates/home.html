@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Nothing To See Here</title>
+    <title>Access Restricted</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -12,72 +15,137 @@
 
         body {
             height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 30%, #1e293b, #0f172a 40%, #020617 100%);
+            color: #e2e8f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            overflow: hidden;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            padding: 60px 50px;
-            border-radius: 20px;
+        /* Subtle animated gradient glow */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99,102,241,0.25), transparent 70%);
+            top: -200px;
+            right: -200px;
+            filter: blur(80px);
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.6; }
+            to { transform: scale(1.2); opacity: 0.9; }
+        }
+
+        .container {
+            position: relative;
+            max-width: 600px;
+            padding: 60px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
             text-align: center;
-            width: 480px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: float 4s ease-in-out infinite;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 50px;
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
         }
 
         h1 {
-            font-size: 28px;
+            font-size: 32px;
+            font-weight: 600;
             margin-bottom: 20px;
-            letter-spacing: 1px;
+            color: #f8fafc;
         }
 
         p {
             font-size: 16px;
-            opacity: 0.8;
-            line-height: 1.6;
+            line-height: 1.7;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .divider {
+            height: 1px;
+            width: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+            margin: 30px 0;
+        }
+
+        .meta {
+            font-size: 13px;
+            color: #64748b;
         }
 
         .lock {
-            font-size: 50px;
-            margin-bottom: 25px;
+            font-size: 42px;
+            margin-bottom: 20px;
+            opacity: 0.8;
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .footer {
+        footer {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             font-size: 12px;
-            opacity: 0.5;
+            color: #475569;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 40px 30px;
+                margin: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="lock">🔒</div>
-        <h1>Nothing To See Here</h1>
+    <div class="container">
+        <div class="lock">🔐</div>
+        <div class="badge">Backend Service</div>
+
+        <h1>Access Restricted</h1>
+
         <p>
-            This is a backend service.<br>
-            There’s nothing you can access from here.<br><br>
-            If you're looking for something… you're in the wrong place.
+            This endpoint powers the internal API infrastructure of Soltryx Solutions.
+            It does not expose public content or user-accessible resources.
         </p>
+
+        <p>
+            If you're trying to access application data, please use the authorized frontend interface.
+            Direct navigation to this service is intentionally limited.
+        </p>
+
+        <div class="divider"></div>
+
+        <div class="meta">
+            API Status: Operational • Environment: Production • Security: Enforced
+        </div>
     </div>
 
-    <div class="footer">
-        © 2026 | Soltryx Solutions
-    </div>
+    <footer>
+        © 2026 Soltryx Solutions. All rights reserved.
+    </footer>
 
 </body>
 </html>
