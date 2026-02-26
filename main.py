@@ -24,7 +24,7 @@ app.register_blueprint(sms_bp, url_prefix='/api/sms')  # Register sms blueprint
 
 @app.route('/')
 def home():
-    return '✅ Flask backend for ResqAlert is running.'
+    return 'Theres nothing much in here.......'
     # This is the root endpoint
 if __name__ == '__main__':
     app.run() # Main function
