@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Access Restricted</title>
+    <title>RESQALERT Core Node</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -15,137 +15,211 @@
 
         body {
             height: 100vh;
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at 20% 30%, #1e293b, #0f172a 40%, #020617 100%);
-            color: #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow: hidden;
+            background: #020617;
+            font-family: 'Inter', sans-serif;
+            color: #e2e8f0;
         }
 
-        /* Subtle animated gradient glow */
+        /* Animated grid background */
         body::before {
             content: "";
             position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(99,102,241,0.25), transparent 70%);
-            top: -200px;
-            right: -200px;
-            filter: blur(80px);
-            animation: pulse 8s ease-in-out infinite alternate;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: moveGrid 20s linear infinite;
         }
 
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 0.6; }
-            to { transform: scale(1.2); opacity: 0.9; }
+        @keyframes moveGrid {
+            from { background-position: 0 0; }
+            to { background-position: 40px 40px; }
+        }
+
+        /* Scanning line */
+        .scan {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00ffff, transparent);
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
         }
 
         .container {
             position: relative;
-            max-width: 600px;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .panel {
+            width: 750px;
             padding: 60px;
-            border-radius: 24px;
-            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0,255,255,0.15);
+            box-shadow: 0 0 40px rgba(0,255,255,0.1);
             text-align: center;
+            position: relative;
         }
 
         .badge {
-            display: inline-block;
-            padding: 6px 14px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
             font-size: 12px;
-            font-weight: 500;
-            border-radius: 50px;
-            background: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            margin-bottom: 25px;
-            letter-spacing: 0.5px;
+            color: #00ffff;
+            margin-bottom: 20px;
         }
 
         h1 {
-            font-size: 32px;
-            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
             margin-bottom: 20px;
-            color: #f8fafc;
+            position: relative;
+            display: inline-block;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px #00ffff; }
+            20% { text-shadow: -2px -2px #ff00ff; }
+            40% { text-shadow: 2px -2px #00ffff; }
+            60% { text-shadow: -2px 2px #ff00ff; }
+            80% { text-shadow: 2px 2px #00ffff; }
+            100% { text-shadow: 0 0 10px #00ffff; }
         }
 
         p {
-            font-size: 16px;
-            line-height: 1.7;
             color: #94a3b8;
-            margin-bottom: 30px;
-        }
-
-        .divider {
-            height: 1px;
-            width: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
-            margin: 30px 0;
-        }
-
-        .meta {
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        .lock {
-            font-size: 42px;
+            line-height: 1.7;
             margin-bottom: 20px;
-            opacity: 0.8;
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        .status span {
+            color: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .logs {
+            margin-top: 30px;
+            height: 120px;
+            overflow: hidden;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+            color: #38bdf8;
+        }
+
+        .logs div {
+            animation: scrollLogs 10s linear infinite;
+        }
+
+        @keyframes scrollLogs {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
         }
 
         footer {
             position: absolute;
-            bottom: 30px;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
             font-size: 12px;
             color: #475569;
-            letter-spacing: 0.5px;
         }
 
-        @media (max-width: 640px) {
-            .container {
-                padding: 40px 30px;
-                margin: 20px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
+        .clock {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #00ffff;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="lock">🔐</div>
-        <div class="badge">Backend Service</div>
+<div class="scan"></div>
+<div class="clock" id="clock"></div>
 
-        <h1>Access Restricted</h1>
+<div class="container">
+    <div class="panel">
+
+        <div class="badge">RESQALERT • SECURE CORE NODE</div>
+
+        <h1>ACCESS RESTRICTED</h1>
 
         <p>
-            This endpoint powers the internal API infrastructure of Soltryx Solutions.
-            It does not expose public content or user-accessible resources.
+            You have reached a protected backend infrastructure endpoint.
+            This system handles internal API operations and is not intended for direct public access.
         </p>
 
         <p>
-            If you're trying to access application data, please use the authorized frontend interface.
-            Direct navigation to this service is intentionally limited.
+            Unauthorized interaction is logged and monitored.
+            Please access services through the official frontend application.
         </p>
 
-        <div class="divider"></div>
-
-        <div class="meta">
-            API Status: Operational • Environment: Production • Security: Enforced
+        <div class="status">
+            <div>API Status: <span>ONLINE</span></div>
+            <div>Firewall: <span>ACTIVE</span></div>
+            <div>Environment: <span>PRODUCTION</span></div>
         </div>
-    </div>
 
-    <footer>
-        © 2026 Soltryx Solutions. All rights reserved.
-    </footer>
+        <div class="logs">
+            <div>
+                [SYS] Initializing security modules...<br>
+                [AUTH] Token validation active.<br>
+                [NET] Traffic encryption enabled.<br>
+                [FW] Intrusion detection running...<br>
+                [CORE] Monitoring incoming requests...<br>
+                [SYS] Initializing security modules...<br>
+                [AUTH] Token validation active.<br>
+                [NET] Traffic encryption enabled.<br>
+                [FW] Intrusion detection running...<br>
+                [CORE] Monitoring incoming requests...
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer>
+    © 2026 Soltryx Solutions • RESQALERT Infrastructure
+</footer>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText =
+            now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
 
 </body>
 </html>
