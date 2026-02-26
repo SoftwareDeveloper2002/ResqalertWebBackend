@@ -4,7 +4,7 @@
     <title>RESQALERT Core Node</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -14,23 +14,28 @@
         }
 
         body {
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
             background: #020617;
             font-family: 'Inter', sans-serif;
             color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Animated grid background */
         body::before {
             content: "";
             position: absolute;
             inset: 0;
             background-image:
-                linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px);
+                linear-gradient(rgba(0,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,255,0.04) 1px, transparent 1px);
             background-size: 40px 40px;
-            animation: moveGrid 20s linear infinite;
+            animation: moveGrid 18s linear infinite;
+            opacity: 0.6;
         }
 
         @keyframes moveGrid {
@@ -43,7 +48,8 @@
             width: 100%;
             height: 2px;
             background: linear-gradient(to right, transparent, #00ffff, transparent);
-            animation: scan 4s linear infinite;
+            animation: scan 5s linear infinite;
+            opacity: 0.7;
         }
 
         @keyframes scan {
@@ -51,25 +57,31 @@
             to { top: 100%; }
         }
 
+        .clock {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: #00ffff;
+        }
+
         .container {
             position: relative;
             z-index: 2;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%;
+            max-width: 900px;
         }
 
         .panel {
-            width: 820px;
-            padding: 60px;
-            border-radius: 20px;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0,255,255,0.15);
-            box-shadow: 0 0 50px rgba(0,255,255,0.15);
+            width: 100%;
+            padding: 50px;
+            border-radius: 22px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(0,255,255,0.12);
+            box-shadow: 0 40px 90px rgba(0,0,0,0.6);
             text-align: center;
-            position: relative;
         }
 
         .badge {
@@ -77,14 +89,14 @@
             letter-spacing: 2px;
             font-size: 12px;
             color: #00ffff;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 38px;
-            margin-bottom: 20px;
-            animation: glitch 2s infinite;
+            font-size: 36px;
+            margin-bottom: 18px;
+            animation: glitch 2.2s infinite;
         }
 
         @keyframes glitch {
@@ -104,8 +116,15 @@
         .status {
             display: flex;
             justify-content: space-between;
-            margin-top: 30px;
+            gap: 15px;
+            margin-top: 28px;
             font-size: 14px;
+            flex-wrap: wrap;
+        }
+
+        .status div {
+            flex: 1;
+            min-width: 150px;
         }
 
         .status span {
@@ -124,8 +143,26 @@
             font-family: monospace;
             font-size: 13px;
             color: #38bdf8;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.45);
             padding: 15px;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .details-grid {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            color: #22d3ee;
+        }
+
+        .details-grid div {
+            background: rgba(0,0,0,0.35);
+            padding: 12px;
             border-radius: 10px;
         }
 
@@ -137,11 +174,14 @@
             font-size: 12px;
             text-align: left;
             color: #22d3ee;
+            background: rgba(0,0,0,0.25);
+            padding: 10px;
+            border-radius: 10px;
         }
 
         .logs span {
             display: block;
-            animation: scrollLogs 12s linear infinite;
+            animation: scrollLogs 14s linear infinite;
         }
 
         @keyframes scrollLogs {
@@ -151,20 +191,25 @@
 
         footer {
             position: absolute;
-            bottom: 20px;
+            bottom: 12px;
             width: 100%;
             text-align: center;
             font-size: 12px;
             color: #475569;
         }
 
-        .clock {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 14px;
-            color: #00ffff;
+        @media (max-width: 768px) {
+            .panel {
+                padding: 35px 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .status {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -183,6 +228,7 @@
         <p>
             This endpoint is part of the protected backend infrastructure.
             Direct public interaction is not permitted.
+            All access attempts are logged for security compliance.
         </p>
 
         <div class="status">
@@ -191,12 +237,21 @@
             <div>Environment: <span>PRODUCTION</span></div>
         </div>
 
-        <!-- Flask Data Display -->
         <div class="info-box">
-            Visitor IP: {{ ip }} <br>
-            User Agent: {{ user_agent }} <br>
-            Referrer: {{ referrer }} <br>
+            <strong>Visitor Metadata</strong><br>
+            IP Address: {{ ip }}<br>
+            User Agent: {{ user_agent }}<br>
+            Referrer: {{ referrer }}<br>
             Server Time: {{ time }}
+        </div>
+
+        <div class="details-grid">
+            <div>Screen: <span id="screen"></span></div>
+            <div>Language: <span id="language"></span></div>
+            <div>Platform: <span id="platform"></span></div>
+            <div>Timezone: <span id="timezone"></span></div>
+            <div>Cookies Enabled: <span id="cookies"></span></div>
+            <div>Online: <span id="online"></span></div>
         </div>
 
         <div class="logs">
@@ -206,11 +261,9 @@
                 [NET] Encrypting traffic stream...<br>
                 [SEC] Logging visitor metadata...<br>
                 [CORE] System stable...<br>
-                [SYS] Initializing modules...<br>
-                [AUTH] Verifying request origin...<br>
-                [NET] Encrypting traffic stream...<br>
-                [SEC] Logging visitor metadata...<br>
-                [CORE] System stable...
+                [LOG] Access attempt recorded...<br>
+                [SYS] Monitoring active...<br>
+                [SEC] No unauthorized data exposure...
             </span>
         </div>
 
@@ -222,25 +275,29 @@
 </footer>
 
 <script>
-    // Live Clock
     function updateClock() {
-        const now = new Date();
-        document.getElementById('clock').innerText =
-            now.toLocaleTimeString();
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Send device info to backend
+    document.getElementById('screen').innerText = window.screen.width + "x" + window.screen.height;
+    document.getElementById('language').innerText = navigator.language;
+    document.getElementById('platform').innerText = navigator.platform;
+    document.getElementById('timezone').innerText = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.getElementById('cookies').innerText = navigator.cookieEnabled ? "Enabled" : "Disabled";
+    document.getElementById('online').innerText = navigator.onLine ? "Online" : "Offline";
+
     fetch("/device-info", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             screen: window.screen.width + "x" + window.screen.height,
             platform: navigator.platform,
-            language: navigator.language
+            language: navigator.language,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            cookies: navigator.cookieEnabled,
+            online: navigator.onLine
         })
     });
 </script>
