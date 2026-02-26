@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_cors import CORS
 from report import report_bp
 from dashboard import dashboard_bp
@@ -24,7 +24,7 @@ app.register_blueprint(sms_bp, url_prefix='/api/sms')  # Register sms blueprint
 
 @app.route('/')
 def home():
-    return 'Theres nothing much in here.......'
+    return render_template('home.html')
     # This is the root endpoint
 if __name__ == '__main__':
     app.run() # Main function
