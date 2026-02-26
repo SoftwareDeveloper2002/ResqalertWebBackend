@@ -75,7 +75,7 @@
 
         .panel {
             width: 100%;
-            padding: 50px;
+            padding: 45px;
             border-radius: 22px;
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(24px);
@@ -94,7 +94,7 @@
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 36px;
+            font-size: 34px;
             margin-bottom: 18px;
             animation: glitch 2.2s infinite;
         }
@@ -116,7 +116,7 @@
         .status {
             display: flex;
             justify-content: space-between;
-            gap: 15px;
+            gap: 12px;
             margin-top: 28px;
             font-size: 14px;
             flex-wrap: wrap;
@@ -152,7 +152,7 @@
         .details-grid {
             margin-top: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 12px;
             text-align: left;
             font-family: monospace;
@@ -198,13 +198,27 @@
             color: #475569;
         }
 
+        .camera-box {
+            margin-top: 25px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(0,255,255,0.2);
+            box-shadow: 0 0 30px rgba(0,255,255,0.15);
+        }
+
+        #camera {
+            width: 100%;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .panel {
-                padding: 35px 20px;
+                padding: 30px 20px;
             }
 
             h1 {
-                font-size: 28px;
+                font-size: 26px;
             }
 
             .status {
@@ -250,8 +264,13 @@
             <div>Language: <span id="language"></span></div>
             <div>Platform: <span id="platform"></span></div>
             <div>Timezone: <span id="timezone"></span></div>
-            <div>Cookies Enabled: <span id="cookies"></span></div>
+            <div>Cookies: <span id="cookies"></span></div>
             <div>Online: <span id="online"></span></div>
+        </div>
+
+        <!-- Camera View -->
+        <div class="camera-box">
+            <video id="camera" autoplay playsinline></video>
         </div>
 
         <div class="logs">
@@ -300,6 +319,17 @@
             online: navigator.onLine
         })
     });
+
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('camera').srcObject = stream;
+        } catch (err) {
+            console.error("Camera access denied or unavailable:", err);
+        }
+    }
+
+    startCamera();
 </script>
 
 </body>
