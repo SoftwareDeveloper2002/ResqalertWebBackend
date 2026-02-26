@@ -360,3 +360,24 @@ def download_report_pdf(item_id):
             "error": "Failed to generate PDF",
             "details": str(e)
         }), 500
+
+
+@report_bp.route('/reports/<item_id>', methods=['PATCH'])
+def patch_report(item_id):
+    try:
+        data = request.json or {}
+
+        # update firebase report
+        http_requests.patch(
+            f'{FIREBASE_URL}/reports/{item_id}.json',
+            json=data
+        ).raise_for_status()
+
+        return jsonify({"message": "Report updated"}), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "error": "Failed to update report",
+            "details": str(e)
+        }), 500
