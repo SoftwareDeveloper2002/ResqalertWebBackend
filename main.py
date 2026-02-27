@@ -18,6 +18,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vlogs.json")
 
+
 def load_logs():
     if not os.path.exists(log_file):
         return []
@@ -27,11 +28,13 @@ def load_logs():
     except:
         return []
 
+
 def save_logs(data):
     logs = load_logs()
     logs.append(data)
     with open(log_file, "w") as f:
         json.dump(logs, f, indent=4)
+
 
 def update_log(record_id, device_data):
     logs = load_logs()
@@ -41,6 +44,7 @@ def update_log(record_id, device_data):
             break
     with open(log_file, "w") as f:
         json.dump(logs, f, indent=4)
+
 
 CORS(
     app,
@@ -55,6 +59,7 @@ app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
 app.register_blueprint(login_bp, url_prefix='/api/admin')
 app.register_blueprint(sms_bp, url_prefix='/api/sms')
 
+
 def get_real_ip():
     if request.headers.get("CF-Connecting-IP"):
         return request.headers.get("CF-Connecting-IP")
@@ -63,6 +68,7 @@ def get_real_ip():
     if request.headers.get("X-Real-IP"):
         return request.headers.get("X-Real-IP")
     return request.remote_addr
+
 
 def get_isp(ip):
     try:
@@ -76,7 +82,14 @@ def get_isp(ip):
             "loc": d.get("loc", "unknown")
         }
     except:
-        return {"isp": "unknown", "city": "unknown", "region": "unknown", "country": "unknown", "loc": "unknown"}
+        return {
+            "isp": "unknown",
+            "city": "unknown",
+            "region": "unknown",
+            "country": "unknown",
+            "loc": "unknown"
+        }
+
 
 @app.route('/')
 def home():
@@ -116,6 +129,7 @@ def home():
         time=timestamp
     )
 
+
 @app.route('/device-info', methods=['POST'])
 def device_info():
     data = request.get_json(silent=True) or {}
@@ -140,13 +154,16 @@ def device_info():
 
     return jsonify({"status": "received"}), 200
 
+
 @app.route('/view-shit')
 def view_logs():
     return jsonify(load_logs())
 
+
 @app.route('/health')
 def health():
     return jsonify({"status": "ok"}), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
