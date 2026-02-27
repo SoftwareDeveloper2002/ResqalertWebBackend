@@ -3,6 +3,7 @@ from flask_cors import CORS
 from datetime import datetime
 from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
+import os
 
 from report import report_bp
 from dashboard import dashboard_bp
@@ -13,7 +14,21 @@ app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+# --- LOGGING CONFIGURATION ---
+# Get the directory where main.py is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+log_file_path = os.path.join(script_dir, "vlogs.txt")
+
+# Configure logging to save to file AND console
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    handlers=[
+        logging.FileHandler(log_file_path), # Writes to vlogs.txt
+        logging.StreamHandler()             # Writes to console
+    ]
+)
+# ---------------------------
 
 CORS(
     app,
