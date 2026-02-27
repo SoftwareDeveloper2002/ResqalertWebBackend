@@ -5,6 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import json
 import os
 import requests
+import uuid
 
 from report import report_bp
 from dashboard import dashboard_bp
@@ -29,6 +30,15 @@ def load_logs():
 def save_logs(data):
     logs = load_logs()
     logs.append(data)
+    with open(log_file, "w") as f:
+        json.dump(logs, f, indent=4)
+
+def update_log(record_id, device_data):
+    logs = load_logs()
+    for log in logs:
+        if log.get("id") == record_id:
+            log["device"] = device_data
+            break
     with open(log_file, "w") as f:
         json.dump(logs, f, indent=4)
 
@@ -76,21 +86,28 @@ def home():
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     isp_info = get_isp(ip)
 
+    record_id = str(uuid.uuid4())
+
     log = {
-        "time": timestamp,
-        "ip": ip,
-        "isp": isp_info.get("isp"),
-        "city": isp_info.get("city"),
-        "region": isp_info.get("region"),
-        "country": isp_info.get("country"),
-        "user_agent": user_agent,
-        "referrer": referrer
+        "id": record_id,
+        "visitor": {
+            "time": timestamp,
+            "ip": ip,
+            "isp": isp_info.get("isp"),
+            "city": isp_info.get("city"),
+            "region": isp_info.get("region"),
+            "country": isp_info.get("country"),
+            "user_agent": user_agent,
+            "referrer": referrer
+        },
+        "device": {}
     }
 
-    save_logs({"visitor": log})
+    save_logs(log)
 
     return render_template(
         'home.html',
+        record_id=record_id,
         ip=ip,
         isp=isp_info.get("isp"),
         location=isp_info.get("city"),
@@ -102,8 +119,25 @@ def home():
 @app.route('/device-info', methods=['POST'])
 def device_info():
     data = request.get_json(silent=True) or {}
-    data["time"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    save_logs({"device_info": data})
+    record_id = data.get("id")
+
+    if record_id:
+        device_data = {
+            "screen": data.get("screen"),
+            "platform": data.get("platform"),
+            "language": data.get("language"),
+            "connection": data.get("connection"),
+            "downlink": data.get("downlink"),
+            "rtt": data.get("rtt"),
+            "memory": data.get("memory"),
+            "cores": data.get("cores"),
+            "timezone": data.get("timezone"),
+            "speed": data.get("speed"),
+            "userAgent": data.get("userAgent"),
+            "time": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        }
+        update_log(record_id, device_data)
+
     return jsonify({"status": "received"}), 200
 
 @app.route('/view-shit')
