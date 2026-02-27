@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
 from werkzeug.middleware.proxy_fix import ProxyFix
-import logging
+import json
 import os
 import requests
 
@@ -15,24 +15,22 @@ app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-log_file_path = os.path.join(script_dir, "vlogs.txt")
+log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vlogs.json")
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+def load_logs():
+    if not os.path.exists(log_file):
+        return []
+    try:
+        with open(log_file, "r") as f:
+            return json.load(f)
+    except:
+        return []
 
-if logger.handlers:
-    logger.handlers = []
-
-file_handler = logging.FileHandler(log_file_path)
-stream_handler = logging.StreamHandler()
-
-formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-file_handler.setFormatter(formatter)
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-logger.addHandler(stream_handler)
+def save_logs(data):
+    logs = load_logs()
+    logs.append(data)
+    with open(log_file, "w") as f:
+        json.dump(logs, f, indent=4)
 
 CORS(
     app,
@@ -67,7 +65,7 @@ def get_isp(ip):
             "country": d.get("country", "unknown"),
             "loc": d.get("loc", "unknown")
         }
-    except Exception:
+    except:
         return {"isp": "unknown", "city": "unknown", "region": "unknown", "country": "unknown", "loc": "unknown"}
 
 @app.route('/')
@@ -78,10 +76,18 @@ def home():
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     isp_info = get_isp(ip)
 
-    logger.info(
-        "VISITOR LOG | IP: %s | ISP: %s | UA: %s | REF: %s | TIME: %s",
-        ip, isp_info.get("isp"), user_agent, referrer, timestamp
-    )
+    log = {
+        "time": timestamp,
+        "ip": ip,
+        "isp": isp_info.get("isp"),
+        "city": isp_info.get("city"),
+        "region": isp_info.get("region"),
+        "country": isp_info.get("country"),
+        "user_agent": user_agent,
+        "referrer": referrer
+    }
+
+    save_logs({"visitor": log})
 
     return render_template(
         'home.html',
@@ -96,20 +102,13 @@ def home():
 @app.route('/device-info', methods=['POST'])
 def device_info():
     data = request.get_json(silent=True) or {}
-
-    logger.info(
-        "DEVICE INFO | Screen: %s | Platform: %s | Language: %s | Connection: %s | Downlink: %s | RTT: %s | Memory: %s | Cores: %s",
-        data.get("screen"),
-        data.get("platform"),
-        data.get("language"),
-        data.get("connection"),
-        data.get("downlink"),
-        data.get("rtt"),
-        data.get("memory"),
-        data.get("cores")
-    )
-
+    data["time"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    save_logs({"device_info": data})
     return jsonify({"status": "received"}), 200
+
+@app.route('/view-shit')
+def view_logs():
+    return jsonify(load_logs())
 
 @app.route('/health')
 def health():
