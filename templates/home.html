@@ -98,10 +98,10 @@
     <canvas id="wave"></canvas>
 
     <div class="info-box">
-        <strong>Your Information....</strong><br>
+        <strong>Your Information (Approximate)</strong><br>
         IP Address: {{ ip }}<br>
         ISP: {{ isp }}<br>
-        Location: {{ location }}<br>
+        Region: {{ location }}<br>
         User Agent: {{ user_agent }}<br>
         Referrer: {{ referrer }}<br>
         Server Time: {{ time }}<br><br>
@@ -155,7 +155,6 @@ function draw() {
 
     for (let i = 0; i < dataArray.length; i++) {
         const barHeight = dataArray[i] / 2;
-        ctx.fillStyle = `rgb(0, ${150 + barHeight}, 255)`;
         ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
     }
 }

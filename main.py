@@ -61,6 +61,7 @@ app.register_blueprint(sms_bp, url_prefix='/api/sms')
 
 
 def get_real_ip():
+    """Get real client IP (Cloudflare & proxies supported)."""
     if request.headers.get("CF-Connecting-IP"):
         return request.headers.get("CF-Connecting-IP")
     if request.headers.get("X-Forwarded-For"):
@@ -71,31 +72,27 @@ def get_real_ip():
 
 
 def get_isp(ip):
+    """
+    Get ISP and approximate location.
+    Latitude/longitude from IP geolocation are NOT precise—
+    so we store only ISP, city, and region (no coords).
+    """
     try:
         r = requests.get(f"https://ipinfo.io/{ip}/json", timeout=5)
         d = r.json()
-        loc = d.get("loc", "unknown")
-        latitude = longitude = "unknown"
-
-        if loc and "," in loc:
-            latitude, longitude = loc.split(",")
 
         return {
             "isp": d.get("org", "unknown"),
             "city": d.get("city", "unknown"),
             "region": d.get("region", "unknown"),
-            "country": d.get("country", "unknown"),
-            "latitude": latitude,
-            "longitude": longitude
+            "country": d.get("country", "unknown")
         }
     except:
         return {
             "isp": "unknown",
             "city": "unknown",
             "region": "unknown",
-            "country": "unknown",
-            "latitude": "unknown",
-            "longitude": "unknown"
+            "country": "unknown"
         }
 
 
@@ -105,8 +102,8 @@ def home():
     user_agent = request.headers.get('User-Agent', 'Unknown')
     referrer = request.referrer or 'None'
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    isp_info = get_isp(ip)
 
+    isp_info = get_isp(ip)
     record_id = str(uuid.uuid4())
 
     log = {
@@ -118,8 +115,6 @@ def home():
             "city": isp_info.get("city"),
             "region": isp_info.get("region"),
             "country": isp_info.get("country"),
-            "latitude": isp_info.get("latitude"),
-            "longitude": isp_info.get("longitude"),
             "user_agent": user_agent,
             "referrer": referrer
         },
