@@ -95,7 +95,7 @@
 
     <div class="orb" id="orb"></div>
 
-    <!-- REAL AUDIO WAVEFORM -->
+    <!-- AUDIO WAVEFORM -->
     <canvas id="wave"></canvas>
 
     <div class="info-box">
@@ -103,7 +103,13 @@
         IP Address: {{ ip }}<br>
         User Agent: {{ user_agent }}<br>
         Referrer: {{ referrer }}<br>
-        Server Time: {{ time }}
+        Server Time: {{ time }}<br><br>
+
+        <strong>Network</strong><br>
+        Connection: <span id="conn"></span><br>
+        Downlink: <span id="down"></span> Mbps<br>
+        RTT: <span id="rtt"></span> ms<br>
+        Speed Score: <span id="speed"></span>
     </div>
 
     <footer>
@@ -128,24 +134,22 @@ function initAudio() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
-
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
     draw();
 }
 
 function draw() {
     requestAnimationFrame(draw);
 
-    analyser.getByteFrequencyData(dataArray);
+    if (!analyser) return;
 
+    analyser.getByteFrequencyData(dataArray);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const barWidth = canvas.width / dataArray.length;
 
     for (let i = 0; i < dataArray.length; i++) {
         const barHeight = dataArray[i] / 2;
-
         ctx.fillStyle = `rgb(0, ${150 + barHeight}, 255)`;
         ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1, barHeight);
     }
@@ -158,16 +162,10 @@ function speak(text) {
     utterance.rate = 0.9;
     utterance.pitch = 0.85;
 
-    const source = audioContext.createMediaStreamDestination();
-    const synth = window.speechSynthesis;
-
     orb.classList.add("speaking");
+    utterance.onend = () => orb.classList.remove("speaking");
 
-    utterance.onend = () => {
-        orb.classList.remove("speaking");
-    };
-
-    synth.speak(utterance);
+    window.speechSynthesis.speak(utterance);
 }
 
 function getGreeting() {
@@ -177,10 +175,48 @@ function getGreeting() {
     return "Good evening";
 }
 
-window.onload = () => {
+async function measureSpeed() {
+    const start = performance.now();
+    try {
+        await fetch('/static/speed-test.png?' + Date.now(), { cache: 'no-store' });
+        return (1000 / (performance.now() - start)).toFixed(2);
+    } catch {
+        return "unknown";
+    }
+}
+
+function sendDeviceInfo() {
+    const conn = navigator.connection || {};
+
+    document.getElementById("conn").innerText = conn.effectiveType || "unknown";
+    document.getElementById("down").innerText = conn.downlink || "unknown";
+    document.getElementById("rtt").innerText = conn.rtt || "unknown";
+
+    const data = {
+        screen: window.screen.width + "x" + window.screen.height,
+        platform: navigator.platform,
+        language: navigator.language,
+        connection: conn.effectiveType || "unknown",
+        downlink: conn.downlink || "unknown",
+        rtt: conn.rtt || "unknown",
+        speed: document.getElementById("speed").innerText
+    };
+
+    fetch('/device-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).catch(console.error);
+}
+
+window.onload = async () => {
+    const speed = await measureSpeed();
+    document.getElementById("speed").innerText = speed;
+
+    sendDeviceInfo();
+
     setTimeout(() => {
-        speak(`${getGreeting()}. Welcome to ResQAlert Backend. 
-        Security systems are fully operational. Monitoring is active.`);
+        speak(`${getGreeting()}. Welcome to ResQAlert Backend. Security systems are operational.`);
     }, 1500);
 };
 </script>

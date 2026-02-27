@@ -12,17 +12,14 @@ from sms import sms_bp
 
 app = Flask(__name__)
 
-# Trust reverse proxies (AWS ALB, Nginx, Cloudflare)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
-# Logging configuration
 script_dir = os.path.dirname(os.path.abspath(__file__))
 log_file_path = os.path.join(script_dir, "vlogs.txt")
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# Clear existing handlers (important to avoid duplicates)
 if logger.handlers:
     logger.handlers = []
 
@@ -36,7 +33,6 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
-# CORS
 CORS(
     app,
     resources={r"/api/*": {"origins": "*"}},
@@ -45,7 +41,6 @@ CORS(
     allow_headers=["Content-Type", "Authorization"]
 )
 
-# Blueprints
 app.register_blueprint(report_bp, url_prefix='/api/report')
 app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
 app.register_blueprint(login_bp, url_prefix='/api/admin')
@@ -91,12 +86,13 @@ def device_info():
     data = request.get_json(silent=True) or {}
 
     logger.info(
-        "DEVICE INFO | Screen: %s | Platform: %s | Language: %s | Connection: %s | Downlink: %s",
+        "DEVICE INFO | Screen: %s | Platform: %s | Language: %s | Connection: %s | Downlink: %s | RTT: %s",
         data.get("screen"),
         data.get("platform"),
         data.get("language"),
         data.get("connection"),
-        data.get("downlink")
+        data.get("downlink"),
+        data.get("rtt")
     )
 
     return jsonify({"status": "received"}), 200
