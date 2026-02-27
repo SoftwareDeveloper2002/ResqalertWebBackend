@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from report import report_bp
 from dashboard import dashboard_bp
@@ -8,6 +9,9 @@ from login import login_bp
 from sms import sms_bp
 
 app = Flask(__name__)
+
+# Trust reverse proxy headers
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 # ===============================
 # CORS Configuration
@@ -30,32 +34,15 @@ app.register_blueprint(sms_bp, url_prefix='/api/sms')
 
 
 # ===============================
-# Helper: Get Real Client IP
-# ===============================
-def get_client_ip():
-    # Cloudflare
-    if request.headers.get('CF-Connecting-IP'):
-        return request.headers.get('CF-Connecting-IP')
-
-    # Reverse proxy / load balancer
-    if request.headers.get('X-Forwarded-For'):
-        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
-
-    # Direct connection
-    return request.remote_addr
-
-
-# ===============================
 # Root Endpoint
 # ===============================
 @app.route('/')
 def home():
-    ip = get_client_ip()
+    ip = request.remote_addr
     user_agent = request.headers.get('User-Agent')
     referrer = request.referrer
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
 
-    # Structured logging
     print("\n===== VISITOR LOG =====")
     print(f"IP Address   : {ip}")
     print(f"User Agent   : {user_agent}")
@@ -72,9 +59,6 @@ def home():
     )
 
 
-# ===============================
-# Collect Extra Device Info (Optional)
-# ===============================
 @app.route('/device-info', methods=['POST'])
 def device_info():
     data = request.get_json()
@@ -88,8 +72,5 @@ def device_info():
     return jsonify({"status": "received"}), 200
 
 
-# ===============================
-# Run Application
-# ===============================
 if __name__ == '__main__':
     app.run()
