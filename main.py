@@ -74,12 +74,19 @@ def get_isp(ip):
     try:
         r = requests.get(f"https://ipinfo.io/{ip}/json", timeout=5)
         d = r.json()
+        loc = d.get("loc", "unknown")
+        latitude = longitude = "unknown"
+
+        if loc and "," in loc:
+            latitude, longitude = loc.split(",")
+
         return {
             "isp": d.get("org", "unknown"),
             "city": d.get("city", "unknown"),
             "region": d.get("region", "unknown"),
             "country": d.get("country", "unknown"),
-            "loc": d.get("loc", "unknown")
+            "latitude": latitude,
+            "longitude": longitude
         }
     except:
         return {
@@ -87,7 +94,8 @@ def get_isp(ip):
             "city": "unknown",
             "region": "unknown",
             "country": "unknown",
-            "loc": "unknown"
+            "latitude": "unknown",
+            "longitude": "unknown"
         }
 
 
@@ -110,6 +118,8 @@ def home():
             "city": isp_info.get("city"),
             "region": isp_info.get("region"),
             "country": isp_info.get("country"),
+            "latitude": isp_info.get("latitude"),
+            "longitude": isp_info.get("longitude"),
             "user_agent": user_agent,
             "referrer": referrer
         },
