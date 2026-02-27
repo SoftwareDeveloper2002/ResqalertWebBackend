@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>RESQALERT Core Node</title>
+    <title>RESQALERT AI Core</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             min-height: 100vh;
@@ -22,10 +18,9 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* Animated grid */
         body::before {
             content: "";
             position: absolute;
@@ -42,139 +37,43 @@
             to { background-position: 50px 50px; }
         }
 
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            position: relative;
-            z-index: 2;
-        }
-
         .panel {
             padding: 50px;
             border-radius: 24px;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(30px);
             border: 1px solid rgba(0,255,255,0.15);
-            box-shadow: 
-                0 0 60px rgba(0,255,255,0.08),
-                0 40px 100px rgba(0,0,0,0.7);
+            box-shadow: 0 0 60px rgba(0,255,255,0.08),
+                        0 40px 100px rgba(0,0,0,0.7);
+            max-width: 900px;
+            text-align: center;
             position: relative;
-            overflow: hidden;
-        }
-
-        /* Animated border glow */
-        .panel::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            padding: 1px;
-            background: linear-gradient(120deg, #00ffff, #0ea5e9, #22d3ee, #00ffff);
-            background-size: 300% 300%;
-            animation: borderGlow 6s ease infinite;
-            -webkit-mask:
-                linear-gradient(#000 0 0) content-box,
-                linear-gradient(#000 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-        }
-
-        @keyframes borderGlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .badge {
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 3px;
-            font-size: 12px;
-            color: #00ffff;
-            margin-bottom: 20px;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
             font-size: 36px;
             margin-bottom: 20px;
-            text-shadow: 0 0 15px rgba(0,255,255,0.6);
-        }
-
-        p {
-            color: #94a3b8;
-            line-height: 1.8;
-            margin-bottom: 25px;
-        }
-
-        .status {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .status div {
-            flex: 1;
-            min-width: 160px;
-            padding: 15px;
-            background: rgba(0,0,0,0.35);
-            border-radius: 12px;
-            font-size: 14px;
-        }
-
-        .status span {
-            color: #00ff88;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%,100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .info-box {
-            margin-top: 30px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #38bdf8;
-            background: rgba(0,0,0,0.45);
-            padding: 20px;
-            border-radius: 14px;
-            line-height: 1.6;
-        }
-
-        .details-grid {
-            margin-top: 25px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #22d3ee;
-        }
-
-        .details-grid div {
-            background: rgba(0,0,0,0.35);
-            padding: 15px;
-            border-radius: 12px;
-        }
-
-        /* Futuristic Core Visual */
-        .core-visual {
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
+            text-shadow: 0 0 15px rgba(0,255,255,0.7);
         }
 
         .orb {
-            width: 140px;
-            height: 140px;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
+            margin: 40px auto;
             background: radial-gradient(circle, #00ffff 0%, #0ea5e9 40%, transparent 70%);
-            box-shadow: 
-                0 0 40px #00ffff,
-                0 0 80px #0ea5e9;
+            box-shadow: 0 0 40px #00ffff,
+                        0 0 80px #0ea5e9;
             animation: rotate 12s linear infinite;
+            transition: all 0.3s ease;
+        }
+
+        .speaking {
+            box-shadow: 0 0 60px #00ffff,
+                        0 0 120px #0ea5e9,
+                        0 0 160px #22d3ee;
+            transform: scale(1.1);
         }
 
         @keyframes rotate {
@@ -182,81 +81,93 @@
             to { transform: rotate(360deg); }
         }
 
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 12px;
-            color: #475569;
+        .info-box {
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #38bdf8;
+            background: rgba(0,0,0,0.45);
+            padding: 20px;
+            border-radius: 14px;
+            text-align: left;
         }
 
-        @media (max-width: 768px) {
-            .panel {
-                padding: 30px 20px;
-            }
-            h1 {
-                font-size: 26px;
-            }
+        button {
+            margin-top: 25px;
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(90deg, #00ffff, #0ea5e9);
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #475569;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="panel">
+<div class="panel">
 
-        <div class="badge">RESQALERT • SECURE CORE NODE</div>
+    <h1>RESQALERT AI CORE</h1>
 
-        <h1>ACCESS RESTRICTED</h1>
+    <div class="orb" id="orb"></div>
 
-        <p>
-            This endpoint is part of the protected backend infrastructure.
-            Direct public interaction is not permitted.
-            All inbound traffic is monitored, logged, and validated
-            against enterprise-grade security policies.
-        </p>
-
-        <div class="status">
-            <div>API Status: <span>ONLINE</span></div>
-            <div>Firewall: <span>ACTIVE</span></div>
-            <div>Threat Monitor: <span>STABLE</span></div>
-            <div>Environment: <span>PRODUCTION</span></div>
-        </div>
-
-        <div class="info-box">
-            <strong>Visitor Metadata</strong><br>
-            IP Address: {{ ip }}<br>
-            User Agent: {{ user_agent }}<br>
-            Referrer: {{ referrer }}<br>
-            Server Time: {{ time }}
-        </div>
-
-        <div class="details-grid">
-            <div>Screen: <span id="screen"></span></div>
-            <div>Language: <span id="language"></span></div>
-            <div>Platform: <span id="platform"></span></div>
-            <div>Timezone: <span id="timezone"></span></div>
-            <div>Cookies: <span id="cookies"></span></div>
-            <div>Online: <span id="online"></span></div>
-        </div>
-
-        <div class="core-visual">
-            <div class="orb"></div>
-        </div>
-
-        <footer>
-            © 2026 Soltryx Solutions • RESQALERT Infrastructure
-        </footer>
-
+    <div class="info-box">
+        <strong>Visitor Metadata</strong><br>
+        IP Address: {{ ip }}<br>
+        User Agent: {{ user_agent }}<br>
+        Referrer: {{ referrer }}<br>
+        Server Time: {{ time }}
     </div>
+
+    <button onclick="speakMessage()">Activate AI Assistant</button>
+
+    <footer>
+        © 2026 Soltryx Solutions • AI Monitoring Active
+    </footer>
+
 </div>
 
 <script>
-    document.getElementById('screen').innerText = window.screen.width + "x" + window.screen.height;
-    document.getElementById('language').innerText = navigator.language;
-    document.getElementById('platform').innerText = navigator.platform;
-    document.getElementById('timezone').innerText = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    document.getElementById('cookies').innerText = navigator.cookieEnabled ? "Enabled" : "Disabled";
-    document.getElementById('online').innerText = navigator.onLine ? "Online" : "Offline";
+    const orb = document.getElementById("orb");
+
+    function speak(text) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.rate = 0.9;
+        speech.pitch = 1;
+        speech.volume = 1;
+
+        orb.classList.add("speaking");
+
+        speech.onend = () => {
+            orb.classList.remove("speaking");
+        };
+
+        window.speechSynthesis.speak(speech);
+    }
+
+    function speakMessage() {
+        speak("Welcome to ResQAlert AI Core. This system is protected and actively monitored. Unauthorized access attempts are logged.");
+    }
+
+    // Auto speak on load (after user interaction delay safe)
+    window.onload = () => {
+        setTimeout(() => {
+            speak("System initialized. Security protocols active.");
+        }, 1200);
+    };
 </script>
 
 </body>
