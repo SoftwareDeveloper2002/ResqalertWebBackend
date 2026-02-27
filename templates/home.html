@@ -95,7 +95,6 @@
 
     <div class="orb" id="orb"></div>
 
-    <!-- AUDIO WAVEFORM -->
     <canvas id="wave"></canvas>
 
     <div class="info-box">
@@ -109,7 +108,10 @@
         Connection: <span id="conn"></span><br>
         Downlink: <span id="down"></span> Mbps<br>
         RTT: <span id="rtt"></span> ms<br>
-        Speed Score: <span id="speed"></span>
+        Speed Score: <span id="speed"></span><br>
+        Device Memory: <span id="memory"></span> GB<br>
+        Cores: <span id="cores"></span><br>
+        Timezone: <span id="tz"></span>
     </div>
 
     <footer>
@@ -191,6 +193,9 @@ function sendDeviceInfo() {
     document.getElementById("conn").innerText = conn.effectiveType || "unknown";
     document.getElementById("down").innerText = conn.downlink || "unknown";
     document.getElementById("rtt").innerText = conn.rtt || "unknown";
+    document.getElementById("memory").innerText = navigator.deviceMemory || "unknown";
+    document.getElementById("cores").innerText = navigator.hardwareConcurrency || "unknown";
+    document.getElementById("tz").innerText = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const data = {
         screen: window.screen.width + "x" + window.screen.height,
@@ -199,7 +204,11 @@ function sendDeviceInfo() {
         connection: conn.effectiveType || "unknown",
         downlink: conn.downlink || "unknown",
         rtt: conn.rtt || "unknown",
-        speed: document.getElementById("speed").innerText
+        memory: navigator.deviceMemory || "unknown",
+        cores: navigator.hardwareConcurrency || "unknown",
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        speed: document.getElementById("speed").innerText,
+        userAgent: navigator.userAgent
     };
 
     fetch('/device-info', {
@@ -210,13 +219,11 @@ function sendDeviceInfo() {
 }
 
 window.onload = async () => {
-    const speed = await measureSpeed();
-    document.getElementById("speed").innerText = speed;
-
+    document.getElementById("speed").innerText = await measureSpeed();
     sendDeviceInfo();
 
     setTimeout(() => {
-        speak(`${getGreeting()}. Welcome to ResQAlert Backend. Security systems are operational.`);
+        speak(`${getGreeting()}. Welcome to ResQAlert Backend. Monitoring is active.`);
     }, 1500);
 };
 </script>

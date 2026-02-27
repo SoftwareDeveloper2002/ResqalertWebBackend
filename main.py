@@ -14,6 +14,7 @@ app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
+# Logging to file and console
 script_dir = os.path.dirname(os.path.abspath(__file__))
 log_file_path = os.path.join(script_dir, "vlogs.txt")
 
@@ -86,13 +87,15 @@ def device_info():
     data = request.get_json(silent=True) or {}
 
     logger.info(
-        "DEVICE INFO | Screen: %s | Platform: %s | Language: %s | Connection: %s | Downlink: %s | RTT: %s",
+        "DEVICE INFO | Screen: %s | Platform: %s | Language: %s | Connection: %s | Downlink: %s | RTT: %s | Memory: %s | Cores: %s",
         data.get("screen"),
         data.get("platform"),
         data.get("language"),
         data.get("connection"),
         data.get("downlink"),
-        data.get("rtt")
+        data.get("rtt"),
+        data.get("memory"),
+        data.get("cores")
     )
 
     return jsonify({"status": "received"}), 200
