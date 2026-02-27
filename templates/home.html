@@ -100,6 +100,8 @@
     <div class="info-box">
         <strong>Your Information....</strong><br>
         IP Address: {{ ip }}<br>
+        ISP: {{ isp }}<br>
+        Location: {{ location }}<br>
         User Agent: {{ user_agent }}<br>
         Referrer: {{ referrer }}<br>
         Server Time: {{ time }}<br><br>
@@ -121,6 +123,7 @@
 </div>
 
 <script>
+const recordId = "{{ record_id }}";
 const orb = document.getElementById("orb");
 const canvas = document.getElementById("wave");
 const ctx = canvas.getContext("2d");
@@ -198,6 +201,7 @@ function sendDeviceInfo() {
     document.getElementById("tz").innerText = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const data = {
+        id: recordId,
         screen: window.screen.width + "x" + window.screen.height,
         platform: navigator.platform,
         language: navigator.language,
