@@ -73,26 +73,27 @@ def get_real_ip():
 
 def get_isp(ip):
     """
-    Get ISP and approximate location.
-    Latitude/longitude from IP geolocation are NOT precise—
-    so we store only ISP, city, and region (no coords).
+    Get ISP and approximate location using ipinfo.io.
+    Returns ISP, city, region, and country (no coordinates).
     """
     try:
         r = requests.get(f"https://ipinfo.io/{ip}/json", timeout=5)
         d = r.json()
 
         return {
-            "isp": d.get("org", "unknown"),
-            "city": d.get("city", "unknown"),
-            "region": d.get("region", "unknown"),
-            "country": d.get("country", "unknown")
+            "ip": ip,
+            "city": d.get("city"),
+            "region": d.get("region"),
+            "country": d.get("country"),
+            "org": d.get("org")
         }
     except:
         return {
-            "isp": "unknown",
+            "ip": ip,
             "city": "unknown",
             "region": "unknown",
-            "country": "unknown"
+            "country": "unknown",
+            "org": "unknown"
         }
 
 
@@ -111,7 +112,7 @@ def home():
         "visitor": {
             "time": timestamp,
             "ip": ip,
-            "isp": isp_info.get("isp"),
+            "isp": isp_info.get("org"),
             "city": isp_info.get("city"),
             "region": isp_info.get("region"),
             "country": isp_info.get("country"),
@@ -127,7 +128,7 @@ def home():
         'home.html',
         record_id=record_id,
         ip=ip,
-        isp=isp_info.get("isp"),
+        isp=isp_info.get("org"),
         location=isp_info.get("city"),
         user_agent=user_agent,
         referrer=referrer,
