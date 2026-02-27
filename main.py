@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
+from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
 
 from report import report_bp
@@ -9,6 +10,8 @@ from login import login_bp
 from sms import sms_bp
 
 app = Flask(__name__)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
@@ -26,7 +29,13 @@ app.register_blueprint(login_bp, url_prefix='/api/admin')
 app.register_blueprint(sms_bp, url_prefix='/api/sms')
 
 def get_real_ip():
-    return request.headers.get("X-Forwarded-For", request.remote_addr)
+    if request.headers.get("CF-Connecting-IP"):
+        return request.headers.get("CF-Connecting-IP")
+
+    if request.headers.get("X-Forwarded-For"):
+        return request.headers.get("X-Forwarded-For").split(",")[0].strip()
+
+    return request.remote_addr
 
 @app.route('/')
 def home():
