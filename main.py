@@ -4,6 +4,7 @@ from datetime import datetime
 from werkzeug.middleware.proxy_fix import ProxyFix
 import logging
 import os
+import requests
 
 from report import report_bp
 from dashboard import dashboard_bp
@@ -14,7 +15,6 @@ app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
-# Logging to file and console
 script_dir = os.path.dirname(os.path.abspath(__file__))
 log_file_path = os.path.join(script_dir, "vlogs.txt")
 
@@ -47,19 +47,28 @@ app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
 app.register_blueprint(login_bp, url_prefix='/api/admin')
 app.register_blueprint(sms_bp, url_prefix='/api/sms')
 
-
 def get_real_ip():
     if request.headers.get("CF-Connecting-IP"):
         return request.headers.get("CF-Connecting-IP")
-
     if request.headers.get("X-Forwarded-For"):
         return request.headers.get("X-Forwarded-For").split(",")[0].strip()
-
     if request.headers.get("X-Real-IP"):
         return request.headers.get("X-Real-IP")
-
     return request.remote_addr
 
+def get_isp(ip):
+    try:
+        r = requests.get(f"https://ipinfo.io/{ip}/json", timeout=5)
+        d = r.json()
+        return {
+            "isp": d.get("org", "unknown"),
+            "city": d.get("city", "unknown"),
+            "region": d.get("region", "unknown"),
+            "country": d.get("country", "unknown"),
+            "loc": d.get("loc", "unknown")
+        }
+    except Exception:
+        return {"isp": "unknown", "city": "unknown", "region": "unknown", "country": "unknown", "loc": "unknown"}
 
 @app.route('/')
 def home():
@@ -67,20 +76,22 @@ def home():
     user_agent = request.headers.get('User-Agent', 'Unknown')
     referrer = request.referrer or 'None'
     timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    isp_info = get_isp(ip)
 
     logger.info(
-        "VISITOR LOG | IP: %s | UA: %s | REF: %s | TIME: %s",
-        ip, user_agent, referrer, timestamp
+        "VISITOR LOG | IP: %s | ISP: %s | UA: %s | REF: %s | TIME: %s",
+        ip, isp_info.get("isp"), user_agent, referrer, timestamp
     )
 
     return render_template(
         'home.html',
         ip=ip,
+        isp=isp_info.get("isp"),
+        location=isp_info.get("city"),
         user_agent=user_agent,
         referrer=referrer,
         time=timestamp
     )
-
 
 @app.route('/device-info', methods=['POST'])
 def device_info():
@@ -100,11 +111,9 @@ def device_info():
 
     return jsonify({"status": "received"}), 200
 
-
 @app.route('/health')
 def health():
     return jsonify({"status": "ok"}), 200
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
